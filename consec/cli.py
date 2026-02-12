@@ -10,6 +10,7 @@ import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from consec import __version__
+from consec.models import Severity
 from consec.parser import (
     ParseError,
     extract_vulnerabilities,
@@ -17,7 +18,6 @@ from consec.parser import (
     parse_trivy_json,
     to_documents,
 )
-from consec.models import Severity
 from consec.utils import (
     console,
     display_response,

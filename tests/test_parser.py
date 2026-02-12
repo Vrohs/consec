@@ -13,7 +13,6 @@ from consec.parser import (
     to_documents,
 )
 
-
 SAMPLE_SCAN_DIR = Path(__file__).parent.parent / "data" / "sample_scans"
 
 
