@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -44,18 +43,18 @@ class Severity(str, Enum):
 
 
 class CVSS(BaseModel):
-    v3_score: Optional[float] = Field(None, alias="V3Score")
-    v3_vector: Optional[str] = Field(None, alias="V3Vector")
-    v2_score: Optional[float] = Field(None, alias="V2Score")
-    v2_vector: Optional[str] = Field(None, alias="V2Vector")
+    v3_score: float | None = Field(None, alias="V3Score")
+    v3_vector: str | None = Field(None, alias="V3Vector")
+    v2_score: float | None = Field(None, alias="V2Score")
+    v2_vector: str | None = Field(None, alias="V2Vector")
 
     model_config = {"populate_by_name": True}
 
 
 class DataSource(BaseModel):
-    id: Optional[str] = Field(None, alias="ID")
-    name: Optional[str] = Field(None, alias="Name")
-    url: Optional[str] = Field(None, alias="URL")
+    id: str | None = Field(None, alias="ID")
+    name: str | None = Field(None, alias="Name")
+    url: str | None = Field(None, alias="URL")
 
     model_config = {"populate_by_name": True}
 
@@ -63,23 +62,23 @@ class DataSource(BaseModel):
 class Vulnerability(BaseModel):
     vulnerability_id: str = Field(..., alias="VulnerabilityID")
     pkg_name: str = Field("", alias="PkgName")
-    pkg_id: Optional[str] = Field(None, alias="PkgID")
+    pkg_id: str | None = Field(None, alias="PkgID")
     installed_version: str = Field("", alias="InstalledVersion")
-    fixed_version: Optional[str] = Field(None, alias="FixedVersion")
+    fixed_version: str | None = Field(None, alias="FixedVersion")
     severity: str = Field("UNKNOWN", alias="Severity")
-    severity_source: Optional[str] = Field(None, alias="SeveritySource")
-    title: Optional[str] = Field(None, alias="Title")
-    description: Optional[str] = Field(None, alias="Description")
+    severity_source: str | None = Field(None, alias="SeveritySource")
+    title: str | None = Field(None, alias="Title")
+    description: str | None = Field(None, alias="Description")
     references: list[str] = Field(default_factory=list, alias="References")
-    cvss: Optional[dict[str, CVSS]] = Field(None, alias="CVSS")
-    primary_url: Optional[str] = Field(None, alias="PrimaryURL")
-    data_source: Optional[DataSource] = Field(None, alias="DataSource")
-    published_date: Optional[str] = Field(None, alias="PublishedDate")
-    last_modified_date: Optional[str] = Field(None, alias="LastModifiedDate")
-    status: Optional[str] = Field(None, alias="Status")
-    layer: Optional[dict] = Field(None, alias="Layer")
-    pkg_path: Optional[str] = Field(None, alias="PkgPath")
-    target: Optional[str] = Field(None)
+    cvss: dict[str, CVSS] | None = Field(None, alias="CVSS")
+    primary_url: str | None = Field(None, alias="PrimaryURL")
+    data_source: DataSource | None = Field(None, alias="DataSource")
+    published_date: str | None = Field(None, alias="PublishedDate")
+    last_modified_date: str | None = Field(None, alias="LastModifiedDate")
+    status: str | None = Field(None, alias="Status")
+    layer: dict | None = Field(None, alias="Layer")
+    pkg_path: str | None = Field(None, alias="PkgPath")
+    target: str | None = Field(None)
 
     model_config = {"populate_by_name": True}
 
@@ -121,12 +120,10 @@ class Vulnerability(BaseModel):
 
 class Result(BaseModel):
     target: str = Field(..., alias="Target")
-    result_class: Optional[str] = Field(None, alias="Class")
-    result_type: Optional[str] = Field(None, alias="Type")
-    vulnerabilities: Optional[list[Vulnerability]] = Field(
-        None, alias="Vulnerabilities"
-    )
-    misconfigurations: Optional[list[dict]] = Field(None, alias="Misconfigurations")
+    result_class: str | None = Field(None, alias="Class")
+    result_type: str | None = Field(None, alias="Type")
+    vulnerabilities: list[Vulnerability] | None = Field(None, alias="Vulnerabilities")
+    misconfigurations: list[dict] | None = Field(None, alias="Misconfigurations")
 
     model_config = {"populate_by_name": True}
 
@@ -136,23 +133,23 @@ class Result(BaseModel):
 
 
 class Metadata(BaseModel):
-    os: Optional[dict] = Field(None, alias="OS")
-    image_id: Optional[str] = Field(None, alias="ImageID")
-    diff_ids: Optional[list[str]] = Field(None, alias="DiffIDs")
-    repo_tags: Optional[list[str]] = Field(None, alias="RepoTags")
-    repo_digests: Optional[list[str]] = Field(None, alias="RepoDigests")
-    image_config: Optional[dict] = Field(None, alias="ImageConfig")
+    os: dict | None = Field(None, alias="OS")
+    image_id: str | None = Field(None, alias="ImageID")
+    diff_ids: list[str] | None = Field(None, alias="DiffIDs")
+    repo_tags: list[str] | None = Field(None, alias="RepoTags")
+    repo_digests: list[str] | None = Field(None, alias="RepoDigests")
+    image_config: dict | None = Field(None, alias="ImageConfig")
 
     model_config = {"populate_by_name": True}
 
 
 class TrivyReport(BaseModel):
     schema_version: int = Field(2, alias="SchemaVersion")
-    created_at: Optional[str] = Field(None, alias="CreatedAt")
+    created_at: str | None = Field(None, alias="CreatedAt")
     artifact_name: str = Field("", alias="ArtifactName")
-    artifact_type: Optional[str] = Field(None, alias="ArtifactType")
-    metadata: Optional[Metadata] = Field(None, alias="Metadata")
-    results: Optional[list[Result]] = Field(None, alias="Results")
+    artifact_type: str | None = Field(None, alias="ArtifactType")
+    metadata: Metadata | None = Field(None, alias="Metadata")
+    results: list[Result] | None = Field(None, alias="Results")
 
     model_config = {"populate_by_name": True}
 
