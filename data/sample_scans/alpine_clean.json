@@ -1,0 +1,16 @@
+{
+    "SchemaVersion": 2,
+    "CreatedAt": "2025-01-15T11:00:00Z",
+    "ArtifactName": "alpine:3.19",
+    "ArtifactType": "container_image",
+    "Metadata": {
+        "OS": {
+            "Family": "alpine",
+            "Name": "3.19.1"
+        },
+        "RepoTags": [
+            "alpine:3.19"
+        ]
+    },
+    "Results": null
+}

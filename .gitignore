@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ChromaDB local data
+.consec/
+chroma_data/
+
+# Ollama / model caches
+*.gguf
+
+# Administrative / planning files
+task.md
+implementation_plan.md
+walkthrough.md
+*.plan.md
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# Data that shouldn't be committed (large scan files)
+data/advisories/*.json
+!data/sample_scans/
