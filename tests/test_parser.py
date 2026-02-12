@@ -1,5 +1,3 @@
-"""Tests for the Trivy JSON parser."""
-
 import json
 import tempfile
 from pathlib import Path
@@ -20,10 +18,7 @@ SAMPLE_SCAN_DIR = Path(__file__).parent.parent / "data" / "sample_scans"
 
 
 class TestParseTrivyJson:
-    """Behavioral tests for parsing Trivy JSON output."""
-
     def test_parse_valid_file(self):
-        """Given a valid Trivy JSON file, it should parse successfully."""
         report = parse_trivy_json(SAMPLE_SCAN_DIR / "nginx_scan.json")
         assert report.artifact_name == "nginx:1.25"
         assert report.schema_version == 2
@@ -31,14 +26,12 @@ class TestParseTrivyJson:
         assert len(report.results) == 2
 
     def test_parse_clean_scan(self):
-        """Given a scan with no vulnerabilities, it should parse with empty results."""
         report = parse_trivy_json(SAMPLE_SCAN_DIR / "alpine_clean.json")
         assert report.artifact_name == "alpine:3.19"
         assert report.results is None
         assert report.total_vulnerabilities == 0
 
     def test_parse_from_json_string(self):
-        """Should accept a raw JSON string instead of a file path."""
         data = json.dumps(
             {"SchemaVersion": 2, "ArtifactName": "test:latest", "Results": []}
         )
@@ -46,34 +39,28 @@ class TestParseTrivyJson:
         assert report.artifact_name == "test:latest"
 
     def test_parse_invalid_json_raises_error(self):
-        """Given malformed JSON, it should raise ParseError."""
         with pytest.raises(ParseError, match="Invalid JSON"):
             parse_trivy_json("{invalid json}")
 
     def test_parse_non_object_json_raises_error(self):
-        """Given a JSON array instead of object, it should raise ParseError."""
         with pytest.raises(ParseError, match="Expected a JSON object"):
             parse_trivy_json("[]")
 
     def test_parse_nonexistent_file_as_string(self):
-        """Given a string that isn't a file path or valid JSON, it should raise ParseError."""
         with pytest.raises(ParseError):
             parse_trivy_json("/nonexistent/path/that/is/not/json")
 
     def test_parse_empty_string_raises_error(self):
-        """Given an empty string, it should raise ParseError."""
         with pytest.raises(ParseError):
             parse_trivy_json("")
 
     def test_parse_valid_json_missing_required_fields(self):
-        """Given valid JSON that doesn't match Trivy schema, it should still parse with defaults."""
         data = json.dumps({"SchemaVersion": 2})
         report = parse_trivy_json(data)
         assert report.artifact_name == ""
         assert report.total_vulnerabilities == 0
 
     def test_parse_writes_to_temp_file(self):
-        """Should correctly parse from a temporary file."""
         data = {
             "SchemaVersion": 2,
             "ArtifactName": "temp:test",
@@ -101,10 +88,7 @@ class TestParseTrivyJson:
 
 
 class TestExtractVulnerabilities:
-    """Behavioral tests for vulnerability extraction."""
-
     def test_extract_from_multi_result_report(self):
-        """Should flatten vulnerabilities across multiple result targets."""
         report = parse_trivy_json(SAMPLE_SCAN_DIR / "nginx_scan.json")
         vulns = extract_vulnerabilities(report)
         assert len(vulns) == 6
@@ -112,13 +96,11 @@ class TestExtractVulnerabilities:
         assert len(targets) == 2
 
     def test_extract_from_empty_report(self):
-        """Should return empty list for report with no results."""
         report = parse_trivy_json(SAMPLE_SCAN_DIR / "alpine_clean.json")
         vulns = extract_vulnerabilities(report)
         assert vulns == []
 
     def test_extract_annotates_target(self):
-        """Each vulnerability should have its parent target annotated."""
         report = parse_trivy_json(SAMPLE_SCAN_DIR / "nginx_scan.json")
         vulns = extract_vulnerabilities(report)
         for vuln in vulns:
@@ -127,8 +109,6 @@ class TestExtractVulnerabilities:
 
 
 class TestFilterBySeverity:
-    """Behavioral tests for severity-based filtering."""
-
     @pytest.fixture
     def mixed_vulns(self):
         return [
@@ -189,8 +169,6 @@ class TestFilterBySeverity:
 
 
 class TestToDocuments:
-    """Behavioral tests for document conversion."""
-
     @pytest.fixture
     def sample_vulns(self):
         return [
@@ -228,7 +206,6 @@ class TestToDocuments:
         assert meta["has_fix"] is True
 
     def test_deduplication(self):
-        """Duplicate CVE IDs should be deduplicated."""
         vulns = [
             Vulnerability(
                 VulnerabilityID="CVE-DUPE",

@@ -1,5 +1,3 @@
-"""CLI entry point for consec."""
-
 from __future__ import annotations
 
 import json
@@ -55,11 +53,7 @@ def main(
         help="Show version and exit.",
     ),
 ):
-    """🔒 consec — LLM-Powered Container Security Assistant.
-
-    Enhance Trivy vulnerability scans with RAG and local LLMs for
-    natural-language explanations, remediations, and Dockerfile advice.
-    """
+    pass
 
 
 @app.command()
@@ -75,7 +69,6 @@ def scan(
         False, "--ingest", "-i", help="Also ingest results into vector DB"
     ),
 ):
-    """Scan a Docker image with Trivy and display results."""
     print_info(f"Scanning image: {image}")
 
     try:
@@ -126,7 +119,6 @@ def parse(
         "LOW", "--severity", "-s", help="Minimum severity to show"
     ),
 ):
-    """Parse an existing Trivy JSON file and display results."""
     try:
         report = parse_trivy_json(json_file)
     except ParseError as e:
@@ -145,7 +137,6 @@ def parse(
 def ingest(
     json_file: str = typer.Argument(..., help="Path to Trivy JSON file to ingest"),
 ):
-    """Ingest a Trivy scan into the vector database for RAG queries."""
     try:
         report = parse_trivy_json(json_file)
     except ParseError as e:
@@ -168,7 +159,6 @@ def query(
         False, "--interactive", "-I", help="Interactive Q&A mode"
     ),
 ):
-    """Ask a security question using RAG-enhanced LLM analysis."""
     from consec.llm import OllamaConnectionError
     from consec.rag import SecurityRAGChain
 
@@ -212,7 +202,6 @@ def review(
         None, "--scan", help="Trivy JSON for correlation"
     ),
 ):
-    """Review a Dockerfile for security issues."""
     from consec.llm import OllamaConnectionError
     from consec.rag import SecurityRAGChain
 
@@ -250,7 +239,6 @@ def review(
 
 
 def _do_ingest_report(report):
-    """Helper to ingest a report into the vector store."""
     from consec.vectordb import VulnVectorStore
 
     with Progress(
@@ -268,7 +256,6 @@ def _do_ingest_report(report):
 
 
 def _interactive_mode(chain, scan_context=None):
-    """Run an interactive Q&A loop."""
     console.print(
         "\n[bold cyan]🔒 consec Interactive Mode[/bold cyan]\n"
         "Ask security questions. Type [bold]quit[/bold] or [bold]exit[/bold] to leave.\n"

@@ -1,5 +1,3 @@
-"""Prompt templates for security analysis."""
-
 from langchain_core.prompts import ChatPromptTemplate
 
 EXPLAIN_CVE_PROMPT = ChatPromptTemplate.from_messages(

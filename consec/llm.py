@@ -1,5 +1,3 @@
-"""Ollama LLM integration via LangChain."""
-
 from __future__ import annotations
 
 import requests
@@ -9,21 +7,10 @@ from consec.utils import DEFAULT_MODEL, OLLAMA_BASE_URL
 
 
 class OllamaConnectionError(Exception):
-    """Raised when Ollama is not reachable."""
+    pass
 
 
 def check_ollama_connection(base_url: str = OLLAMA_BASE_URL) -> bool:
-    """Check if Ollama is running and reachable.
-
-    Args:
-        base_url: Ollama server URL.
-
-    Returns:
-        True if Ollama is running.
-
-    Raises:
-        OllamaConnectionError: If Ollama cannot be reached.
-    """
     try:
         resp = requests.get(f"{base_url}/api/tags", timeout=5)
         resp.raise_for_status()
@@ -40,14 +27,6 @@ def check_ollama_connection(base_url: str = OLLAMA_BASE_URL) -> bool:
 
 
 def get_available_models(base_url: str = OLLAMA_BASE_URL) -> list[str]:
-    """List models available in the local Ollama instance.
-
-    Args:
-        base_url: Ollama server URL.
-
-    Returns:
-        List of model names.
-    """
     try:
         resp = requests.get(f"{base_url}/api/tags", timeout=5)
         resp.raise_for_status()
@@ -63,20 +42,6 @@ def get_llm(
     temperature: float = 0.1,
     num_predict: int = 1024,
 ) -> ChatOllama:
-    """Create a LangChain ChatOllama instance with connection verification.
-
-    Args:
-        model: Ollama model name.
-        base_url: Ollama server URL.
-        temperature: Sampling temperature (lower = more deterministic).
-        num_predict: Maximum tokens to generate.
-
-    Returns:
-        Configured ChatOllama instance.
-
-    Raises:
-        OllamaConnectionError: If Ollama is not reachable.
-    """
     check_ollama_connection(base_url)
 
     return ChatOllama(

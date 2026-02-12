@@ -1,11 +1,6 @@
-"""Tests for Pydantic data models."""
-
 import pytest
 
 from consec.models import (
-    CVSS,
-    DataSource,
-    Metadata,
     Result,
     Severity,
     TrivyReport,
@@ -14,8 +9,6 @@ from consec.models import (
 
 
 class TestSeverity:
-    """Behavioral tests for the Severity enum."""
-
     def test_from_valid_string(self):
         assert Severity.from_string("CRITICAL") == Severity.CRITICAL
         assert Severity.from_string("HIGH") == Severity.HIGH
@@ -47,8 +40,6 @@ class TestSeverity:
 
 
 class TestVulnerability:
-    """Behavioral tests for the Vulnerability model."""
-
     @pytest.fixture
     def vuln_with_fix(self):
         return Vulnerability(
@@ -126,7 +117,6 @@ class TestVulnerability:
         assert "Fixed Version" not in doc
 
     def test_alias_parsing(self):
-        """Verify that Trivy JSON field names (PascalCase) map correctly."""
         data = {
             "VulnerabilityID": "CVE-2024-1234",
             "PkgName": "curl",
@@ -146,8 +136,6 @@ class TestVulnerability:
 
 
 class TestResult:
-    """Tests for the Result model."""
-
     def test_vulnerability_count_with_vulns(self):
         result = Result(
             Target="test",
@@ -178,8 +166,6 @@ class TestResult:
 
 
 class TestTrivyReport:
-    """Tests for the TrivyReport model."""
-
     @pytest.fixture
     def report_with_vulns(self):
         return TrivyReport(
