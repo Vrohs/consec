@@ -71,13 +71,17 @@ def display_vulnerability_table(vulns: list[Vulnerability], max_rows: int = 50) 
         )
 
     if len(vulns) > max_rows:
-        table.add_row("...", "...", "...", "...", "...", f"({len(vulns) - max_rows} more)")
+        table.add_row(
+            "...", "...", "...", "...", "...", f"({len(vulns) - max_rows} more)"
+        )
 
     console.print(table)
 
 
 def display_response(response: str, title: str = "Security Analysis") -> None:
-    console.print(Panel(response, title=f"[bold cyan]{title}[/bold cyan]", border_style="cyan"))
+    console.print(
+        Panel(response, title=f"[bold cyan]{title}[/bold cyan]", border_style="cyan")
+    )
 
 
 def print_error(message: str) -> None:
@@ -90,3 +94,28 @@ def print_success(message: str) -> None:
 
 def print_info(message: str) -> None:
     console.print(f"[bold blue]ℹ[/bold blue] {message}")
+
+
+def display_findings(findings: list) -> None:
+    if not findings:
+        console.print("[bold green]✓ No security issues found![/bold green]")
+        return
+
+    table = Table(
+        title=f"Dockerfile Security Findings ({len(findings)})", show_lines=True
+    )
+    table.add_column("Rule", style="cyan", no_wrap=True)
+    table.add_column("Severity", justify="center")
+    table.add_column("Issue", max_width=45)
+    table.add_column("Remediation", max_width=50)
+
+    for f in findings:
+        color = SEVERITY_COLORS.get(f.severity, "white")
+        table.add_row(
+            f.rule_id,
+            f"[{color}]{f.severity}[/{color}]",
+            f.title,
+            f.remediation,
+        )
+
+    console.print(table)

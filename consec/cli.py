@@ -16,6 +16,7 @@ from consec.parser import (
 )
 from consec.utils import (
     console,
+    display_findings,
     display_response,
     display_scan_summary,
     display_vulnerability_table,
@@ -55,9 +56,15 @@ def main(
 @app.command()
 def scan(
     image: str = typer.Argument(..., help="Docker image to scan (e.g., nginx:latest)"),
-    severity: str = typer.Option("LOW", "--severity", "-s", help="Minimum severity to show"),
-    output: str | None = typer.Option(None, "--output", "-o", help="Save JSON output to file"),
-    ingest: bool = typer.Option(False, "--ingest", "-i", help="Also ingest results into vector DB"),
+    severity: str = typer.Option(
+        "LOW", "--severity", "-s", help="Minimum severity to show"
+    ),
+    output: str | None = typer.Option(
+        None, "--output", "-o", help="Save JSON output to file"
+    ),
+    ingest: bool = typer.Option(
+        False, "--ingest", "-i", help="Also ingest results into vector DB"
+    ),
 ):
     print_info(f"Scanning image: {image}")
 
@@ -105,7 +112,9 @@ def scan(
 @app.command()
 def parse(
     json_file: str = typer.Argument(..., help="Path to Trivy JSON output file"),
-    severity: str = typer.Option("LOW", "--severity", "-s", help="Minimum severity to show"),
+    severity: str = typer.Option(
+        "LOW", "--severity", "-s", help="Minimum severity to show"
+    ),
 ):
     try:
         report = parse_trivy_json(json_file)
@@ -138,8 +147,12 @@ def ingest(
 def query(
     question: str = typer.Argument(..., help="Security question to ask"),
     model: str | None = typer.Option(None, "--model", "-m", help="Ollama model name"),
-    scan_file: str | None = typer.Option(None, "--scan", help="Trivy JSON for additional context"),
-    interactive: bool = typer.Option(False, "--interactive", "-I", help="Interactive Q&A mode"),
+    scan_file: str | None = typer.Option(
+        None, "--scan", help="Trivy JSON for additional context"
+    ),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-I", help="Interactive Q&A mode"
+    ),
 ):
     from consec.llm import OllamaConnectionError
     from consec.rag import SecurityRAGChain
@@ -178,7 +191,9 @@ def query(
 def review(
     dockerfile: str = typer.Argument(..., help="Path to Dockerfile to review"),
     model: str | None = typer.Option(None, "--model", "-m", help="Ollama model name"),
-    scan_file: str | None = typer.Option(None, "--scan", help="Trivy JSON for correlation"),
+    scan_file: str | None = typer.Option(
+        None, "--scan", help="Trivy JSON for correlation"
+    ),
 ):
     from consec.llm import OllamaConnectionError
     from consec.rag import SecurityRAGChain
@@ -216,6 +231,33 @@ def review(
     display_response(response, title="Dockerfile Security Review")
 
 
+@app.command()
+def check(
+    dockerfile: str = typer.Argument(..., help="Path to Dockerfile to check"),
+):
+    from consec.parser import parse_dockerfile
+    from consec.rules import check_dockerfile
+
+    path = Path(dockerfile)
+    if not path.exists():
+        print_error(f"Dockerfile not found: {dockerfile}")
+        raise typer.Exit(1)
+
+    print_info(f"Checking {dockerfile} for security issues...")
+    info = parse_dockerfile(path)
+    findings = check_dockerfile(info)
+    display_findings(findings)
+
+    high_or_critical = [f for f in findings if f.severity in ("HIGH", "CRITICAL")]
+    if high_or_critical:
+        print_error(f"{len(high_or_critical)} high/critical issue(s) found.")
+        raise typer.Exit(1)
+    elif findings:
+        print_info(f"{len(findings)} issue(s) found (none critical).")
+    else:
+        print_success("Dockerfile passed all security checks.")
+
+
 def _do_ingest_report(report):
     from consec.vectordb import VulnVectorStore
 
@@ -228,7 +270,9 @@ def _do_ingest_report(report):
         store = VulnVectorStore()
         added = store.ingest_scan(report)
 
-    print_success(f"Ingested {added} new vulnerability documents (total: {store.count})")
+    print_success(
+        f"Ingested {added} new vulnerability documents (total: {store.count})"
+    )
 
 
 def _interactive_mode(chain, scan_context=None):
