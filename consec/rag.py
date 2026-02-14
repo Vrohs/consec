@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from langchain_core.output_parsers import StrOutputParser
 
 from consec.llm import get_llm
@@ -58,11 +56,9 @@ class SecurityRAGChain:
     def review_dockerfile(
         self,
         dockerfile_content: str,
-        scan_summary: Optional[str] = None,
+        scan_summary: str | None = None,
     ) -> str:
-        context = self._retrieve_context(
-            f"Dockerfile security {dockerfile_content[:200]}"
-        )
+        context = self._retrieve_context(f"Dockerfile security {dockerfile_content[:200]}")
         chain = DOCKERFILE_REVIEW_PROMPT | self._get_llm() | self._parser
         return chain.invoke(
             {
@@ -75,8 +71,8 @@ class SecurityRAGChain:
     def ask(
         self,
         question: str,
-        scan_context: Optional[str] = None,
-        dockerfile: Optional[str] = None,
+        scan_context: str | None = None,
+        dockerfile: str | None = None,
     ) -> str:
         combined_query = question
         if scan_context:

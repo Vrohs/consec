@@ -13,7 +13,7 @@ class Severity(str, Enum):
     UNKNOWN = "UNKNOWN"
 
     @classmethod
-    def from_string(cls, value: str) -> "Severity":
+    def from_string(cls, value: str) -> Severity:
         try:
             return cls(value.upper())
         except ValueError:
@@ -29,16 +29,16 @@ class Severity(str, Enum):
             Severity.UNKNOWN: 0,
         }[self]
 
-    def __ge__(self, other: "Severity") -> bool:
+    def __ge__(self, other: Severity) -> bool:
         return self.rank >= other.rank
 
-    def __gt__(self, other: "Severity") -> bool:
+    def __gt__(self, other: Severity) -> bool:
         return self.rank > other.rank
 
-    def __le__(self, other: "Severity") -> bool:
+    def __le__(self, other: Severity) -> bool:
         return self.rank <= other.rank
 
-    def __lt__(self, other: "Severity") -> bool:
+    def __lt__(self, other: Severity) -> bool:
         return self.rank < other.rank
 
 
@@ -91,9 +91,7 @@ class Vulnerability(BaseModel):
         return self.fixed_version is not None and self.fixed_version != ""
 
     def to_summary(self) -> str:
-        fix_info = (
-            f" (fix: {self.fixed_version})" if self.has_fix else " (no fix available)"
-        )
+        fix_info = f" (fix: {self.fixed_version})" if self.has_fix else " (no fix available)"
         return (
             f"[{self.normalized_severity.value}] {self.vulnerability_id}: "
             f"{self.pkg_name}@{self.installed_version}{fix_info}"

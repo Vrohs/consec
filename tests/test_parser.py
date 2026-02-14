@@ -31,9 +31,7 @@ class TestParseTrivyJson:
         assert report.total_vulnerabilities == 0
 
     def test_parse_from_json_string(self):
-        data = json.dumps(
-            {"SchemaVersion": 2, "ArtifactName": "test:latest", "Results": []}
-        )
+        data = json.dumps({"SchemaVersion": 2, "ArtifactName": "test:latest", "Results": []})
         report = parse_trivy_json(data)
         assert report.artifact_name == "test:latest"
 

@@ -71,17 +71,13 @@ def display_vulnerability_table(vulns: list[Vulnerability], max_rows: int = 50) 
         )
 
     if len(vulns) > max_rows:
-        table.add_row(
-            "...", "...", "...", "...", "...", f"({len(vulns) - max_rows} more)"
-        )
+        table.add_row("...", "...", "...", "...", "...", f"({len(vulns) - max_rows} more)")
 
     console.print(table)
 
 
 def display_response(response: str, title: str = "Security Analysis") -> None:
-    console.print(
-        Panel(response, title=f"[bold cyan]{title}[/bold cyan]", border_style="cyan")
-    )
+    console.print(Panel(response, title=f"[bold cyan]{title}[/bold cyan]", border_style="cyan"))
 
 
 def print_error(message: str) -> None:

@@ -1,9 +1,30 @@
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+COPY pyproject.toml requirements.txt ./
+COPY consec/ consec/
+COPY data/sample_scans/ data/sample_scans/
+
+RUN pip install --no-cache-dir --prefix=/install .
+
+
 FROM python:3.11-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN groupadd --gid 1000 consec \
+    && useradd --uid 1000 --gid consec --create-home consec
 
-EXPOSE 8080
+COPY --from=builder /install /usr/local
+COPY --from=builder /build/data /home/consec/data
 
-CMD ["python", "-c", "print('Hello from a vulnerable container!')"]
+ENV CONSEC_HOME=/home/consec/.consec \
+    OLLAMA_BASE_URL=http://host.docker.internal:11434
+
+WORKDIR /home/consec
+USER consec
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD ["consec", "--version"]
+
+ENTRYPOINT ["consec"]
+CMD ["--help"]

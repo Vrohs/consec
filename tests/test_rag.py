@@ -36,9 +36,7 @@ def mock_store(tmp_path):
 @pytest.fixture
 def mock_llm():
     llm = MagicMock()
-    llm.invoke.return_value = MagicMock(
-        content="This is a mocked LLM response about security."
-    )
+    llm.invoke.return_value = MagicMock(content="This is a mocked LLM response about security.")
     return llm
 
 
@@ -97,9 +95,7 @@ class TestSecurityRAGChainGeneration:
 
 class TestSecurityRAGChainDockerfile:
     @patch("consec.rag.get_llm")
-    def test_ask_with_dockerfile_delegates_to_review(
-        self, mock_get_llm, mock_store, mock_llm
-    ):
+    def test_ask_with_dockerfile_delegates_to_review(self, mock_get_llm, mock_store, mock_llm):
         mock_get_llm.return_value = mock_llm
         chain = SecurityRAGChain(vector_store=mock_store)
 

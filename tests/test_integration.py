@@ -5,7 +5,6 @@ import pytest
 from consec.parser import extract_vulnerabilities, parse_trivy_json, to_documents
 from consec.vectordb import VulnVectorStore
 
-
 SAMPLE_SCAN_DIR = Path(__file__).parent.parent / "data" / "sample_scans"
 
 
