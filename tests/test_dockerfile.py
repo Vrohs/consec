@@ -1,4 +1,4 @@
-from consec.dockerfile import parse_dockerfile
+from consec.parser import parse_dockerfile
 
 
 class TestParseDockerfile:

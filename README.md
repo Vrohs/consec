@@ -106,13 +106,12 @@ consec/
 ├── consec/             # Main package
 │   ├── cli.py          # Typer CLI commands
 │   ├── models.py       # Pydantic data models (Trivy schema)
-│   ├── parser.py       # Trivy JSON parser
+│   ├── parser.py       # Trivy JSON & Dockerfile parser
 │   ├── vectordb.py     # ChromaDB vector store
 │   ├── embeddings.py   # Sentence-transformer embeddings
 │   ├── llm.py          # Ollama LLM integration
 │   ├── prompts.py      # LangChain prompt templates
 │   ├── rag.py          # RAG chain orchestration
-│   ├── dockerfile.py   # Dockerfile parser
 │   └── utils.py        # Display helpers & config
 ├── data/sample_scans/  # Sample Trivy JSON outputs
 ├── tests/              # Comprehensive test suite
