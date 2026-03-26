@@ -1,4 +1,4 @@
-from consec.parser import DockerfileInfo, parse_dockerfile
+from consec.parser import parse_dockerfile
 from consec.rules import Finding, check_dockerfile
 
 
@@ -175,9 +175,74 @@ class TestSshPort:
         assert "CSC-008" not in ids
 
 
+class TestPipeToShell:
+    def test_flags_curl_pipe_bash(self):
+        content = "FROM alpine:3.19\nRUN curl -fsSL https://example.com/install.sh | bash"
+        info = parse_dockerfile(content)
+        findings = check_dockerfile(info)
+        ids = [f.rule_id for f in findings]
+        assert "CSC-009" in ids
+
+    def test_flags_wget_pipe_sh(self):
+        content = "FROM alpine:3.19\nRUN wget -qO- https://example.com/setup | sh"
+        info = parse_dockerfile(content)
+        findings = check_dockerfile(info)
+        ids = [f.rule_id for f in findings]
+        assert "CSC-009" in ids
+
+    def test_passes_safe_download(self):
+        content = (
+            "FROM alpine:3.19\n"
+            "RUN curl -fsSL -o install.sh https://example.com/install.sh "
+            "&& sh install.sh"
+        )
+        info = parse_dockerfile(content)
+        findings = check_dockerfile(info)
+        ids = [f.rule_id for f in findings]
+        assert "CSC-009" not in ids
+
+    def test_passes_no_pipe(self):
+        content = "FROM alpine:3.19\nRUN curl -fsSL https://example.com/file.txt -o /tmp/file.txt"
+        info = parse_dockerfile(content)
+        findings = check_dockerfile(info)
+        ids = [f.rule_id for f in findings]
+        assert "CSC-009" not in ids
+
+
+class TestNoMultistage:
+    def test_flags_single_stage(self):
+        info = parse_dockerfile("FROM golang:1.22\nRUN go build -o app .\nCMD ./app")
+        findings = check_dockerfile(info)
+        ids = [f.rule_id for f in findings]
+        assert "CSC-010" in ids
+
+    def test_passes_multistage(self):
+        content = (
+            "FROM golang:1.22 AS builder\n"
+            "RUN go build -o app .\n"
+            "FROM gcr.io/distroless/static:nonroot\n"
+            "COPY --from=builder /app /app\n"
+            "USER nonroot\n"
+            "HEALTHCHECK CMD /app --health\n"
+            "CMD /app"
+        )
+        info = parse_dockerfile(content)
+        findings = check_dockerfile(info)
+        ids = [f.rule_id for f in findings]
+        assert "CSC-010" not in ids
+
+    def test_passes_scratch(self):
+        info = parse_dockerfile("FROM scratch\nCOPY app /app")
+        findings = check_dockerfile(info)
+        ids = [f.rule_id for f in findings]
+        assert "CSC-010" not in ids
+
+
 class TestCheckDockerfile:
     def test_clean_dockerfile_no_findings(self):
-        content = """FROM python:3.11-slim
+        content = """FROM python:3.11-slim AS builder
+RUN pip install -r requirements.txt
+FROM python:3.11-slim
 USER appuser
 HEALTHCHECK CMD python -c 'print("ok")'
 COPY requirements.txt .
@@ -203,6 +268,7 @@ EXPOSE 22"""
         assert "CSC-005" in rule_ids
         assert "CSC-006" in rule_ids
         assert "CSC-008" in rule_ids
+        assert "CSC-010" in rule_ids
 
     def test_empty_dockerfile(self):
         info = parse_dockerfile("")

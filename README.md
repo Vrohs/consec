@@ -6,6 +6,8 @@
 
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
+![CI](https://github.com/Vrohs/consec/actions/workflows/ci.yml/badge.svg)
+![Rules](https://img.shields.io/badge/rules-10-orange)
 
 ---
 
@@ -73,6 +75,15 @@ consec query --interactive "What are the most critical vulnerabilities?"
 
 # Review a Dockerfile for security issues
 consec review Dockerfile --scan data/sample_scans/nginx_scan.json
+
+# Export a Markdown report
+consec export data/sample_scans/nginx_scan.json report.md
+
+# Export a JSON report (for CI pipelines)
+consec export data/sample_scans/nginx_scan.json report.json --format json
+
+# Export only critical/high severity
+consec export data/sample_scans/nginx_scan.json report.md --severity HIGH
 ```
 
 ### Configuration

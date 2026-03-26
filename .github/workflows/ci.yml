@@ -57,6 +57,19 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
+      - name: Generate coverage badge
+        if: matrix.python-version == '3.12' && github.ref == 'refs/heads/main'
+        run: |
+          pip install coverage-badge
+          coverage-badge -o coverage-badge.svg -f
+
+      - name: Upload badge
+        if: matrix.python-version == '3.12' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-badge
+          path: coverage-badge.svg
+
   docker:
     name: Docker Build
     runs-on: ubuntu-latest

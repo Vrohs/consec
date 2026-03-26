@@ -25,8 +25,9 @@ def _check_unpinned_base_image(info: DockerfileInfo) -> list[Finding]:
     for image in info.base_images:
         if image == "scratch":
             continue
-        name_tag = image.split("@")[0]
-        if ":" not in name_tag or name_tag.endswith(":latest"):
+        if "@sha256:" in image:
+            continue
+        if ":" not in image or image.endswith(":latest"):
             findings.append(
                 Finding(
                     rule_id="CSC-001",
@@ -38,7 +39,7 @@ def _check_unpinned_base_image(info: DockerfileInfo) -> list[Finding]:
                     ),
                     remediation=(
                         f"Pin to a specific version, "
-                        f"e.g. {name_tag.split(':')[0]}:3.19-alpine"
+                        f"e.g. {image.split(':')[0]}:3.19-alpine"
                     ),
                 )
             )
@@ -185,6 +186,56 @@ def _check_ssh_port(info: DockerfileInfo) -> Finding | None:
     )
 
 
+PIPE_TO_SHELL_PATTERN = re.compile(
+    r"(curl|wget)\s+.*\|\s*(sh|bash|zsh|dash)",
+    re.IGNORECASE,
+)
+
+
+def _check_pipe_to_shell(info: DockerfileInfo) -> list[Finding]:
+    findings = []
+    for cmd in info.run_commands:
+        if PIPE_TO_SHELL_PATTERN.search(cmd):
+            findings.append(
+                Finding(
+                    rule_id="CSC-009",
+                    severity="MEDIUM",
+                    title=f"Pipe-to-shell detected: {cmd[:60]}",
+                    description=(
+                        "Piping a remote script directly into a shell (curl|sh) runs "
+                        "arbitrary code without verification. If the server is compromised "
+                        "or MITM'd, malicious code executes with container build privileges."
+                    ),
+                    remediation=(
+                        "Download the script first, verify its checksum, then execute: "
+                        "RUN curl -fsSL -o install.sh https://... && "
+                        "echo '<sha256> install.sh' | sha256sum -c - && sh install.sh"
+                    ),
+                )
+            )
+    return findings
+
+
+def _check_no_multistage(info: DockerfileInfo) -> Finding | None:
+    if len(info.base_images) > 1:
+        return None
+    if info.base_images and info.base_images[0] == "scratch":
+        return None
+    return Finding(
+        rule_id="CSC-010",
+        severity="LOW",
+        title="No multi-stage build",
+        description=(
+            "A single-stage build ships compilers, build tools, and intermediate files "
+            "in the final image, increasing attack surface and image size."
+        ),
+        remediation=(
+            "Use multi-stage builds to separate build and runtime: "
+            "FROM golang:1.22 AS builder ... FROM gcr.io/distroless/static ..."
+        ),
+    )
+
+
 def check_dockerfile(info: DockerfileInfo) -> list[Finding]:
     findings: list[Finding] = []
 
@@ -204,6 +255,12 @@ def check_dockerfile(info: DockerfileInfo) -> list[Finding]:
     findings.extend(_check_add_misuse(info))
 
     result = _check_ssh_port(info)
+    if result:
+        findings.append(result)
+
+    findings.extend(_check_pipe_to_shell(info))
+
+    result = _check_no_multistage(info)
     if result:
         findings.append(result)
 

@@ -258,6 +258,42 @@ def check(
         print_success("Dockerfile passed all security checks.")
 
 
+@app.command()
+def export(
+    json_file: str = typer.Argument(..., help="Path to Trivy JSON file"),
+    output: str = typer.Argument(..., help="Output file path"),
+    fmt: str = typer.Option(
+        "markdown", "--format", "-f", help="Output format: markdown or json"
+    ),
+    severity: str = typer.Option(
+        "LOW", "--severity", "-s", help="Minimum severity to include"
+    ),
+):
+    """Export scan results as a Markdown or JSON report."""
+    from consec.exporter import export_json, export_markdown
+
+    try:
+        report = parse_trivy_json(json_file)
+    except ParseError as e:
+        print_error(f"Parse error: {e}")
+        raise typer.Exit(1)
+
+    min_sev = Severity.from_string(severity)
+    vulns = extract_vulnerabilities(report)
+    filtered = filter_by_severity(vulns, min_sev)
+
+    fmt_lower = fmt.lower()
+    if fmt_lower == "markdown":
+        export_markdown(report, filtered, output)
+    elif fmt_lower == "json":
+        export_json(report, filtered, output)
+    else:
+        print_error(f"Unknown format: {fmt}. Use 'markdown' or 'json'.")
+        raise typer.Exit(1)
+
+    print_success(f"Report exported to {output} ({fmt_lower})")
+
+
 def _do_ingest_report(report):
     from consec.vectordb import VulnVectorStore
 
